@@ -160,16 +160,18 @@ public class FileUpload extends HttpServlet {
       
             //setting the title in it
             title.setText("introduction");
-            System.out.println(title.getAnchor().getMinX());
-            System.out.println(title.getAnchor().getMinY());
-            System.out.println(title.getAnchor().getMaxX());
-            System.out.println(title.getAnchor().getMaxY());
-
             int minX = (int)Math.round(title.getAnchor().getMinX());
             int minY = (int)Math.round(title.getAnchor().getMinY());
             int maxX = (int)Math.round(title.getAnchor().getMaxX());
             int maxY = (int)Math.round(title.getAnchor().getMaxY());
+
             
+            // our table is from A3-E8 ((0,2) - (4,7))
+            int startRow = 2;
+            int startColumn = 0;
+            int numColumns = 5;
+            int numRows = 6;
+
             XSLFTable table = slide.createTable();
             // table.setAnchor(new Rectangle(50, 50, 800, 800));
             table.setAnchor(new Rectangle(minX, maxY, maxX - minX, 800));
@@ -177,12 +179,6 @@ public class FileUpload extends HttpServlet {
             XSLFTableRow headerRow = table.addRow();
             headerRow.setHeight(50);
             // header
-
-            // our table is from A3-E8 ((0,2) - (4,7))
-            int startRow = 2;
-            int startColumn = 0;
-            int numColumns = 5;
-            int numRows = 6;
 
             Row hr = sheet.getRow(startRow);
 
