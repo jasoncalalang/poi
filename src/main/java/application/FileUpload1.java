@@ -1,48 +1,73 @@
 package application;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Request;
+import java.io.File;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import org.apache.poi.xslf.usermodel.*;
 import java.awt.Color;
 import org.apache.poi.sl.usermodel.TextParagraph.TextAlign;
 import java.awt.Rectangle;
 
-@Path("upload")
-public class UploadEndpoint {
-    public static final String SAMPLE_XLSX_FILE_PATH = "/home/ike/microservicebuilder/poi/spreadsheet.xlsx";
+@WebServlet("/UploadServlet1")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10, // 10MB
+        maxRequestSize = 1024 * 1024 * 50) // 50MB
+public class FileUpload1 extends HttpServlet {
+    /**
+     * handles file upload
+     */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response uploadxls(@Context HttpServletRequest request) {
-        System.out.println("we are here");
-        System.out.println(request);
+        for (Part part : request.getParts()) {
+
+            XMLSlideShow powerpoint = processFile(part.getInputStream());
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "filename=\"hoge.pptx\"");            
+            powerpoint.write(response.getOutputStream());
+            powerpoint.close();
+
+        }
+        response.getOutputStream().close();
+
+    }
+
+    /**
+     * Extracts file name from HTTP header content-disposition
+     */
+    private String extractFileName(Part part) {
+        String contentDisp = part.getHeader("content-disposition");
+        String[] items = contentDisp.split(";");
+        for (String s : items) {
+            if (s.trim().startsWith("filename")) {
+                return s.substring(s.indexOf("=") + 2, s.length() - 1);
+            }
+        }
+        return "";
+    }
+
+    private XMLSlideShow processFile(InputStream io) {
+
+        XMLSlideShow powerpoint = new XMLSlideShow();
+
         try {
-            /*
-             * if (!healthy) { return
-             * Response.status(503).entity("{\"status\":\"DOWN\"}").build(); }
-             */
-
             // Creating a Workbook from an Excel file (.xls or .xlsx)
-            Workbook workbook = WorkbookFactory.create(new File(SAMPLE_XLSX_FILE_PATH));
+            Workbook workbook = WorkbookFactory.create(io);
 
             // Retrieving the number of sheets in the Workbook
             System.out.println("Workbook has " + workbook.getNumberOfSheets() + " Sheets : ");
@@ -122,11 +147,6 @@ public class UploadEndpoint {
                 System.out.println();
             });
 
-            // Closing the workbook
-            workbook.close();
-
-            XMLSlideShow powerpoint = new XMLSlideShow();
-
             System.out.println("Available slide layouts:");
    
             //getting the list of all slide masters
@@ -185,22 +205,13 @@ public class UploadEndpoint {
                 }
             }
 
-            try {
-                try (FileOutputStream out = new FileOutputStream("/home/ike/microservicebuilder/poi/myFile.pptx")) {
-                    try {
-                        powerpoint.write(out);
-                        powerpoint.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            // Closing the workbook
+            workbook.close();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Response.ok("{\"status\":\"UP\"}").build();
-    }
 
+        return powerpoint;
+    }
 }
