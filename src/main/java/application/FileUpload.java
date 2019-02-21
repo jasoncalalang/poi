@@ -38,10 +38,13 @@ public class FileUpload extends HttpServlet {
             throws ServletException, IOException {
 
         for (Part part : request.getParts()) {
-
+            System.out.println(part.getName());
+            System.out.println(part.getSubmittedFileName());
             XMLSlideShow powerpoint = processFile(part.getInputStream());
-            response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "filename=\"hoge.pptx\"");            
+            System.out.println(getServletContext().getMimeType("presentation.pptx"));
+            // response.setContentType("application/octet-stream");
+            response.setContentType("application/vnd.openxmlformats-officedocument.presentationml.presentation");
+            response.setHeader("Content-Disposition", "filename=\"presentation.pptx\"");
             powerpoint.write(response.getOutputStream());
             powerpoint.close();
 
@@ -117,55 +120,55 @@ public class FileUpload extends HttpServlet {
             // System.out.println("\n\nIterating over Rows and Columns using Iterator\n");
             // Iterator<Row> rowIterator = sheet.rowIterator();
             // while (rowIterator.hasNext()) {
-            //     Row row = rowIterator.next();
-            //     System.out.println(row.getRowNum());
+            // Row row = rowIterator.next();
+            // System.out.println(row.getRowNum());
 
-            //     // Now let's iterate over the columns of the current row
-            //     Iterator<Cell> cellIterator = row.cellIterator();
+            // // Now let's iterate over the columns of the current row
+            // Iterator<Cell> cellIterator = row.cellIterator();
 
-            //     while (cellIterator.hasNext()) {
-            //         Cell cell = cellIterator.next();
-            //         String cellValue = dataFormatter.formatCellValue(cell);
-            //         System.out.print(cellValue + "\t");
-            //     }
-            //     System.out.println();
+            // while (cellIterator.hasNext()) {
+            // Cell cell = cellIterator.next();
+            // String cellValue = dataFormatter.formatCellValue(cell);
+            // System.out.print(cellValue + "\t");
+            // }
+            // System.out.println();
             // }
 
             // // 2. Or you can use a for-each loop to iterate over the rows and columns
-            // System.out.println("\n\nIterating over Rows and Columns using for-each loop\n");
+            // System.out.println("\n\nIterating over Rows and Columns using for-each
+            // loop\n");
             // for (Row row : sheet) {
-            //     for (Cell cell : row) {
-            //         String cellValue = dataFormatter.formatCellValue(cell);
-            //         System.out.print(cellValue + "\t");
-            //     }
-            //     System.out.println();
+            // for (Cell cell : row) {
+            // String cellValue = dataFormatter.formatCellValue(cell);
+            // System.out.print(cellValue + "\t");
+            // }
+            // System.out.println();
             // }
 
             // // 3. Or you can use Java 8 forEach loop with lambda
-            // System.out.println("\n\nIterating over Rows and Columns using Java 8 forEach with lambda\n");
+            // System.out.println("\n\nIterating over Rows and Columns using Java 8 forEach
+            // with lambda\n");
             // sheet.forEach(row -> {
-            //     row.forEach(cell -> {
-            //         String cellValue = dataFormatter.formatCellValue(cell);
-            //         System.out.print(cellValue + "\t");
-            //     });
-            //     System.out.println();
+            // row.forEach(cell -> {
+            // String cellValue = dataFormatter.formatCellValue(cell);
+            // System.out.print(cellValue + "\t");
+            // });
+            // System.out.println();
             // });
 
+            XSLFSlideMaster defaultMaster = powerpoint.getSlideMasters().get(0);
+            XSLFSlideLayout tc = defaultMaster.getLayout(SlideLayout.TITLE_ONLY);
 
-            XSLFSlideMaster defaultMaster = powerpoint.getSlideMasters().get(0);  
-            XSLFSlideLayout tc = defaultMaster.getLayout(SlideLayout.TITLE_ONLY);  
-            
             XSLFSlide slide = powerpoint.createSlide(tc);
             XSLFTextShape title = slide.getPlaceholder(0);
-      
-            //setting the title in it
-            title.setText("introduction");
-            int minX = (int)Math.round(title.getAnchor().getMinX());
-            int minY = (int)Math.round(title.getAnchor().getMinY());
-            int maxX = (int)Math.round(title.getAnchor().getMaxX());
-            int maxY = (int)Math.round(title.getAnchor().getMaxY());
 
-            
+            // setting the title in it
+            title.setText("introduction");
+            int minX = (int) Math.round(title.getAnchor().getMinX());
+            int minY = (int) Math.round(title.getAnchor().getMinY());
+            int maxX = (int) Math.round(title.getAnchor().getMaxX());
+            int maxY = (int) Math.round(title.getAnchor().getMaxY());
+
             // our table is from A3-E8 ((0,2) - (4,7))
             int startRow = 2;
             int startColumn = 0;
@@ -191,7 +194,7 @@ public class FileUpload extends HttpServlet {
                 r.setFontSize(20.0);
                 r.setFontColor(Color.white);
                 th.setFillColor(new Color(79, 129, 189));
-                table.setColumnWidth(i, (maxX - maxY)/numColumns);
+                table.setColumnWidth(i, (maxX - maxY) / numColumns);
             }
 
             // rows
