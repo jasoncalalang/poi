@@ -39,6 +39,11 @@ public class FileUpload extends HttpServlet {
 
         for (Part part : request.getParts()) {
             System.out.println(part.getName());
+            Enumeration<String> e = request.getParameterNames();
+            while (e.hasMoreElements()) {
+				String string = (String) e.nextElement();
+				System.out.println(string);
+			}
             System.out.println(part.getSubmittedFileName());
             XMLSlideShow powerpoint = processFile(part.getInputStream());
             System.out.println(getServletContext().getMimeType("presentation.pptx"));
