@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.sl.usermodel.TextParagraph.TextAlign;
 import org.apache.poi.ss.SpreadsheetVersion;
@@ -74,7 +76,7 @@ import org.apache.poi.util.POILogger;
 public class HelloWorld {
 //	public static final String SAMPLE_XLSX_FILE_PATH = "/home/ike/microservicebuilder/poi/spreadsheet.xlsx";
 	private String xlsxPath = "/home/relucio/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
-	private String pptxTemplate = "/home/relucio/Downloads/MOR-POI-Template.pptx";
+	private String pptxTemplate = "/home/relucio/Downloads/MOR-Template_all.pptx";
 	private String pptxOutput = "/home/relucio/Downloads/output.pptx";
 	
 	private String selectedMonth;
@@ -85,7 +87,7 @@ public class HelloWorld {
 	private DataFormatter dataFormatter = new DataFormatter();
 	private HSSFFormulaEvaluator evaluator;
 	
-	private int pptxChartOffset = 0;
+	private int pptxChartOffset = 9999;
 	
 	private String garageName;
 	private String garageNameReference = "'Garage & GEO Summary'!$F$5";
@@ -93,7 +95,7 @@ public class HelloWorld {
 	private String revenueStart = "'Garage & GEO Summary'!$D$14";
 	private int forecastColOffser = 9;
 	private int backlogColOffset = 11;
-	private String[] deptRevenue = new String[numDepts];
+	private String[] dept = new String[numDepts];
 	private double[] deptForecast = new double[numDepts];
 	private double[] deptBacklog = new double[numDepts];
 	private double[] deptYTD = new double[numDepts];
@@ -101,6 +103,14 @@ public class HelloWorld {
 	private double[] revenueTable = new double[12];
 	private double[] quarterlyTable = new double[12];
 	
+	private HashMap<String, String> map = new HashMap<String, String>(){{
+		put("8E", "Cloud Garage(8E)");
+		put("7G", "Hybrid(7G)");
+		put("7Y", "Analytics(7Y)");    
+		put("9Y", "Blockchain(9Y)");    
+		put("7H", "7H");    
+		}};	
+		
 	private String[] revenueMap = new String[] {
 			"'Garage & GEO Summary'!$F$46",
 			"'Garage & GEO Summary'!$G$46",
@@ -189,45 +199,30 @@ public class HelloWorld {
 			
 			
 			for (XSLFSlide slide : powerpoint.getSlides()) {
-//				System.out.println("Slide : " + slide.getSlideName());
-//				XSLFTextShape [] ts = slide.getPlaceholders();
-//				System.out.println("Placeholders");
-//				for (int i = 0; i < ts.length; i++) {
-//					System.out.println(ts[i].getText());
-//					
-//				}
-//				System.out.println("\n");
 				
 				List <POIXMLDocumentPart> relations = slide.getRelations();
+				for (int i = 0; i < relations.size(); i++) {
+					POIXMLDocumentPart poixmlDocumentPart = (POIXMLDocumentPart) relations.get(i);
+					System.out.println(poixmlDocumentPart);
+					if (poixmlDocumentPart instanceof XSLFChart) {
+						pptxChartOffset = i;
+					}
+					System.out.println(poixmlDocumentPart.getClass());
+//					Name: /ppt/slideLayouts/slideLayout13.xml - Content Type: application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml
+//					Name: /ppt/media/image2.tif - Content Type: image/tif
+//					Name: /ppt/charts/chart1.xml - Content Type: application/vnd.openxmlformats-officedocument.drawingml.chart+xml
+//					Name: /ppt/comments/comment1.xml - Content Type: application/vnd.openxmlformats-officedocument.presentationml.comments+xml
+//					application/vnd.openxmlformats-officedocument.drawingml.chart+xml
+				}
 
-//				for (Iterator<POIXMLDocumentPart> iterator = relations.iterator(); iterator.hasNext();) {
-//					POIXMLDocumentPart poixmlDocumentPart = (POIXMLDocumentPart) iterator.next();
-//					System.out.println(poixmlDocumentPart);
-//				}
-//				System.out.println("\n");
+				System.out.println("\n");
 
-//				Relations -- we want the 3rd one (2)
-//				Name: /ppt/slideLayouts/slideLayout13.xml - Content Type: application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml
-//				Name: /ppt/media/image2.tif - Content Type: image/tif
-//				Name: /ppt/charts/chart1.xml - Content Type: application/vnd.openxmlformats-officedocument.drawingml.chart+xml
-//				Name: /ppt/comments/comment1.xml - Content Type: application/vnd.openxmlformats-officedocument.presentationml.comments+xml
-//				application/vnd.openxmlformats-officedocument.drawingml.chart+xml
 				
-				pptxChartOffset = 2;
 
 				XSLFChart chart = (XSLFChart)relations.get(pptxChartOffset);
-//				List<XDDFChartData> chartdata = chart.getChartSeries();
-//				for (Iterator iterator = chartdata.iterator(); iterator.hasNext();) {
-//					XDDFChartData xddfChartData = (XDDFChartData) iterator.next();
-//					List<Series> series = xddfChartData.getSeries();
-//					for (Iterator iterator2 = series.iterator(); iterator2.hasNext();) {
-//						Series series2 = (Series) iterator2.next();
-//						series2.getValuesData().getDataRangeReference();
-//					}
-//				}
-				
 				XSSFWorkbook pptxworkbook = chart.getWorkbook();
 				pptxworkbook.setMissingCellPolicy(MissingCellPolicy.RETURN_NULL_AND_BLANK);
+
 				updateRevenueTrendsXLS(pptxworkbook, revenueTable);
 				updateQuarterlyTrendsXLS(pptxworkbook, revenueTable);
 				System.out.println("\n");
@@ -237,50 +232,61 @@ public class HelloWorld {
 		            String name = sh.getShapeName();
 		            System.out.println("Shape name : " + name);
 
-		            if (sh instanceof PlaceableShape) {
-		                java.awt.geom.Rectangle2D anchor = ((PlaceableShape)sh).getAnchor();
-		            }
+		            switch (name) {
+					case "SlideTitle":
+						// System.out.println(sh.getClass());
+						((XSLFTextBox)sh).setText("IBM Cloud Garage " + garageName);
+						// System.out.println("placeholder to change slide title");
+						break;
 
-		            if (sh instanceof XSLFConnectorShape) {
-		                XSLFConnectorShape shape = (XSLFConnectorShape) sh;
-		                // System.out.println("is a Connector");
-		            } else if (sh instanceof XSLFTextShape) {
-		                XSLFTextShape shape = (XSLFTextShape) sh;
-//		                System.out.println("is a Text SHape");
-//		                System.out.println(shape.getText());
-		                
-		            } else if (sh instanceof XSLFPictureShape) {
-		                XSLFPictureShape shape = (XSLFPictureShape) sh;
-//		                System.out.println("is a Picture Shape");
-		                
-		            } else if (sh instanceof XSLFTextBox) {
-		            	XSLFTextBox shape = (XSLFTextBox) sh;
-//		                System.out.println("is a Text Box");
-//		                System.out.println(shape.getText());
-		                
-		            } else if (sh instanceof XSLFTable) {
-		            	XSLFTable shape = (XSLFTable) sh;
-		                System.out.println("is a Table");
-		                if (name.equals("MakeMoneyTable")) {
-		                	patchMakeMoneyTable(shape);
-		                	
-		                } else if (name.equals("SpendMoneyTable")) {
-		                	patchSendMoneyTable(shape);
-		                	
-		                } else if (name.equals("UtilizationTable")) {
-		                	patchUtilizationTable(shape);		                	
-		                }
-		                		
-		            } else if (sh instanceof XSLFGraphicFrame) {
-		            	XSLFGraphicFrame shape = (XSLFGraphicFrame)sh;
-//		            	System.out.println("is an Graphic Frame");
-		            	
-		            } else {
-//		            	System.out.println("unknown instance");
-//		            	System.out.println(sh);
-		            	
-		            }
-		            System.out.println("\n\n");
+					case "MakeMoneyTable":
+	                	patchMakeMoneyTable((XSLFTable)sh);
+	                	break;
+
+					case "SpendMoneyTable":
+	                	patchSpendMoneyTable((XSLFTable)sh);
+	                	break;
+
+					case "UtilizationTable":
+	                	patchUtilizationTable((XSLFTable)sh);
+	                	break;
+
+					default:
+						break;
+					}
+		            
+//		            if (sh instanceof PlaceableShape) {
+//		                java.awt.geom.Rectangle2D anchor = ((PlaceableShape)sh).getAnchor();
+//		            }
+//
+//		            if (sh instanceof XSLFConnectorShape) {
+//		                XSLFConnectorShape shape = (XSLFConnectorShape) sh;
+//		                // System.out.println("is a Connector");
+//		            } else if (sh instanceof XSLFTextShape) {
+//		                XSLFTextShape shape = (XSLFTextShape) sh;
+////		                System.out.println("is a Text SHape");
+////		                System.out.println(shape.getText());
+//		                
+//		            } else if (sh instanceof XSLFPictureShape) {
+//		                XSLFPictureShape shape = (XSLFPictureShape) sh;
+////		                System.out.println("is a Picture Shape");
+//		                
+//		            } else if (sh instanceof XSLFTextBox) {
+//		            	XSLFTextBox shape = (XSLFTextBox) sh;
+////		                System.out.println("is a Text Box");
+////		                System.out.println(shape.getText());
+//		                
+//		            } else if (sh instanceof XSLFTable) {
+//		                		
+//		            } else if (sh instanceof XSLFGraphicFrame) {
+//		            	XSLFGraphicFrame shape = (XSLFGraphicFrame)sh;
+////		            	System.out.println("is an Graphic Frame");
+//		            	
+//		            } else {
+////		            	System.out.println("unknown instance");
+////		            	System.out.println(sh);
+//		            	
+//		            }
 		        }
 		    }			
 			
@@ -361,13 +367,14 @@ public class HelloWorld {
 		
 	}
 
-	private void patchSendMoneyTable(XSLFTable shape) {
+	private void patchSpendMoneyTable(XSLFTable shape) {
 		// TODO Auto-generated method stub
 		System.out.println("Patching Send Money Table");
 		int numRows = shape.getNumberOfRows();
 		int numCols = shape.getNumberOfColumns();
 		
 		for (int row = 1; row < numRows; row++) {
+
 			for (int col = 1; col < numCols; col++) {
 				shape.getCell(row, col).setText("S");
 			}
@@ -380,9 +387,16 @@ public class HelloWorld {
 		System.out.println("Patching Make Money Table");
 		int numRows = shape.getNumberOfRows();
 		int numCols = shape.getNumberOfColumns();
-		for (int row = 1; row < numRows; row++) {
-			for (int col = 1; col < numCols; col++) {
 
+		for (int row = 0; row < dept.length; row++) {
+			System.out.println(row + " " + numRows);
+		}
+		
+		
+		
+		for (int row = 1; row < numRows; row++) {
+			
+			for (int col = 1; col < numCols; col++) {
 				shape.getCell(row, col).setText("M");
 			}
 		}
@@ -588,7 +602,7 @@ public class HelloWorld {
 			Row row = sheet.getRow(cellRef.getRow() + i);
 			String deptCode = row.getCell(cellRef.getCol()).getStringCellValue();
 			if (deptCodes.contains(deptCode.trim())) {
-				deptRevenue[i] = deptCode;
+				dept[i] = deptCode;
 				deptForecast[i] = row.getCell(cellRef.getCol() + forecastColOffser).getNumericCellValue();
 				deptBacklog[i] = row.getCell(cellRef.getCol() + backlogColOffset).getNumericCellValue();
 //				System.out.println(dataFormatter.formatCellValue(row.getCell(cellRef.getCol() + forecastColOffser)));
