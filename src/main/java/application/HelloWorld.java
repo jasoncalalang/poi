@@ -9,12 +9,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.poi.sl.usermodel.TextParagraph.TextAlign;
 import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.formula.functions.Sumproduct;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Name;
@@ -48,6 +54,7 @@ import org.apache.poi.xssf.usermodel.XSSFName;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.drawingml.x2006.chart.impl.CTChartImpl;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
@@ -60,6 +67,7 @@ import org.apache.poi.xslf.usermodel.XSLFPictureShape;
 import org.apache.poi.xslf.usermodel.XSLFTable;
 import org.apache.poi.xslf.usermodel.XSLFChart;
 import org.apache.poi.util.IOUtils;
+import org.apache.poi.util.POILogger;
 
 
 
@@ -67,15 +75,33 @@ public class HelloWorld {
 //	public static final String SAMPLE_XLSX_FILE_PATH = "/home/ike/microservicebuilder/poi/spreadsheet.xlsx";
 	private String xlsxPath = "/home/relucio/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
 	private String pptxTemplate = "/home/relucio/Downloads/MOR-POI-Template.pptx";
-	private String pptxOutput = "/tmp/output.pptx";
+	private String pptxOutput = "/home/relucio/Downloads/output.pptx";
+	
+	private String selectedMonth;
+
+	private String deptCodes = "8E/7G/7Y/7H/9Y";
+	private int numDepts = 5;
 
 	private DataFormatter dataFormatter = new DataFormatter();
+	private HSSFFormulaEvaluator evaluator;
 	
-	private int pptxChartOffset = 0; 
+	private int pptxChartOffset = 0;
 	
-	private double[] revenueTable = new double[13];
+	private String garageName;
+	private String garageNameReference = "'Garage & GEO Summary'!$F$5";
+	// make money
+	private String revenueStart = "'Garage & GEO Summary'!$D$14";
+	private int forecastColOffser = 9;
+	private int backlogColOffset = 11;
+	private String[] deptRevenue = new String[numDepts];
+	private double[] deptForecast = new double[numDepts];
+	private double[] deptBacklog = new double[numDepts];
+	private double[] deptYTD = new double[numDepts];
+	
+	private double[] revenueTable = new double[12];
+	private double[] quarterlyTable = new double[12];
+	
 	private String[] revenueMap = new String[] {
-			"",
 			"'Garage & GEO Summary'!$F$46",
 			"'Garage & GEO Summary'!$G$46",
 			"'Garage & GEO Summary'!$H$46",
@@ -91,7 +117,6 @@ public class HelloWorld {
 	};
 	
 	private String[] targetRevenueMap = new String[] {
-			"",
 			"'Sheet1'!$C$2",
 			"'Sheet1'!$C$3",
 			"'Sheet1'!$C$4",
@@ -107,7 +132,6 @@ public class HelloWorld {
 	};
 
 	private String[] targetRevenueQtrMap = new String[] {
-			"",
 			"'Sheet1'!$B$2",
 			"'Sheet1'!$B$3",
 			"'Sheet1'!$B$4",
@@ -125,9 +149,12 @@ public class HelloWorld {
 	
 	private Workbook xlsworkbook;
 	private Workbook pptworkbook;
+
+	private SimpleDateFormat sdf = new SimpleDateFormat("MMMM");
 	
 	public static void main(String[] args) {
 		HelloWorld o = new HelloWorld();
+		o.setSelectedMonth("May");
 		o.doit(args);
 	}
 
@@ -141,28 +168,12 @@ public class HelloWorld {
 
 			// Creating a Workbook from an Excel file (.xls or .xlsx)
 			Workbook workbook = WorkbookFactory.create(new File(getXlsxPath()));
+//			HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(new File(getXlsxPath())));
+			getGarageName(workbook, garageNameReference);
+			System.out.println("Garage : " + garageName);
+			getMakeMoneyTable(workbook, revenueStart);
+		    getRevenueTable(workbook);
 			
-			// retrieveRevenueTable(workbook);
-			// Sheet sheet = workbook.getSheet("Garage & GEO Summary");
-			
-			System.out.println(getStringCellValue(workbook,"'Garage & GEO Summary'!$F$5"));
-			System.out.println("===================" + getNumericCellValue(workbook, "'Garage & GEO Summary'!$F$14"));
-			setStringCellValue(workbook, "'Garage & GEO Summary'!$F$5", "Singapore");
-			System.out.println(getStringCellValue(workbook,"'Garage & GEO Summary'!$F$5"));
-			// HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
-			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-			for (Sheet sheet : workbook) {
-			    for (Row r : sheet) {
-			        for (Cell c : r) {
-//			            if (c.getCellType() == Cell.CELL_TYPE_FORMULA) {
-				        if (c.getCellType().equals("FORMULA")) {
-			                evaluator.evaluateFormulaCell(c);
-			            }
-			        }
-			    }
-			}			
-			HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
-			System.out.println("===================" + getNumericCellValue(workbook, "'Garage & GEO Summary'!$F$14"));
 			workbook.close();
 			
 			
@@ -218,6 +229,7 @@ public class HelloWorld {
 				XSSFWorkbook pptxworkbook = chart.getWorkbook();
 				pptxworkbook.setMissingCellPolicy(MissingCellPolicy.RETURN_NULL_AND_BLANK);
 				updateRevenueTrendsXLS(pptxworkbook, revenueTable);
+				updateQuarterlyTrendsXLS(pptxworkbook, revenueTable);
 				System.out.println("\n");
 
 		        for (XSLFShape sh : slide.getShapes()) {
@@ -365,11 +377,12 @@ public class HelloWorld {
 
 	private void patchMakeMoneyTable(XSLFTable shape) {
 		// TODO Auto-generated method stub
-		System.out.println("Pathcing Make Money Table");
+		System.out.println("Patching Make Money Table");
 		int numRows = shape.getNumberOfRows();
 		int numCols = shape.getNumberOfColumns();
 		for (int row = 1; row < numRows; row++) {
 			for (int col = 1; col < numCols; col++) {
+
 				shape.getCell(row, col).setText("M");
 			}
 		}
@@ -395,13 +408,8 @@ public class HelloWorld {
 	}
 	
 	private void updateRevenueTrendsXLS(Workbook wb, double[] revenue) {
-		Sheet sheet = wb.getSheet("Sheet1");
-		double q1 = revenue[1] + revenue[2] + revenue[3];
-		double q2 = revenue[4] + revenue[5] + revenue[6];
-		double q3 = revenue[7] + revenue[8] + revenue[9];
-		double q4 = revenue[10] + revenue[11] + revenue[12];
-
-		for (int i = 1; i < 13; i++) {
+		System.out.println("Update Revenue Trends table");
+		for (int i = 0; i < 12; i++) {
 			Cell cell = getCell(wb, targetRevenueMap[i]);
 			if (cell == null) {
 				cell = createCell(wb, targetRevenueMap[i]);
@@ -409,32 +417,93 @@ public class HelloWorld {
 			setNumericCellValue(wb, targetRevenueMap[i], revenueTable[i]);
 			System.out.println(cell);
 		}
-		
-//		setCellValue(sheet.getRow(3), 1, q1);
-//		setCellValue(sheet.getRow(6), 1, q2);
-//		setCellValue(sheet.getRow(9), 1, q3);
-//		setCellValue(sheet.getRow(12), 1, q4);
 
 	}
-	
-	private void setCellValue(Row row, int cellidx, double val) {
-		if (row.getCell(cellidx, MissingCellPolicy.RETURN_NULL_AND_BLANK) == null) {
-			row.createCell(cellidx);
+
+	private void updateQuarterlyTrendsXLS(Workbook wb, double[] revenue) {
+		System.out.println("Update Quarterly Trends table");
+		
+		int m = getMonthNumber(selectedMonth);
+		int q = (int) (m/3);
+		int[] qtr = new int [4];
+		qtr[0] = 999;
+		qtr[1] = 999;
+		qtr[2] = 999;
+		qtr[3] = 999;
+		
+		
+		switch (q) {
+		case 0:
+			qtr[0] = m < q ? m : q;
+			break;
+
+		case 1:
+			qtr[0] = 2;
+			qtr[1] = m < q ? m : q;
+			
+			break;
+
+		case 2:
+			qtr[0] = 2;
+			qtr[1] = 5;
+			qtr[2] = m < q ? m : q;
+			
+			break;
+
+		case 3:
+			qtr[0] = 2;
+			qtr[1] = 5;
+			qtr[2] = 8;
+			qtr[3] = m < q ? m : q;
+			
+			break;
+
+		default:
+			break;
 		}
-		row.getCell(cellidx).setCellValue(val);
+		
+		for (int i = 0; i < 12; i++) {
+			quarterlyTable[i] = 0.0;
+		}
+		
+		for (int i = 0; i <= m; i++) {
+			int qs = (int) (i/3);
+			System.out.println("DOH");
+			quarterlyTable[qtr[qs]] = quarterlyTable[qtr[qs]] + revenueTable[i];
+		}
+		
+		for (int i = 0; i < 12; i++) {
+			Cell cell = getCell(wb, targetRevenueQtrMap[i]);
+			if (cell == null) {
+				cell = createCell(wb, targetRevenueQtrMap[i]);
+			}
+			if ((i != qtr[0]) && (i != qtr[1]) && (i != qtr[2]) && (i != qtr[3])) {
+				cell.setCellType(CellType.BLANK);
+				continue;
+			}
+			setNumericCellValue(wb, targetRevenueQtrMap[i], quarterlyTable[i]);
+//			System.out.println(cell);
+			
+		}
+		
 	}
 	
-	private void retrieveRevenueTable(Workbook wb) {
+	
+	private void getRevenueTable(Workbook wb) {
 		
-		for (int i = 1; i < 13; i++) {
-			revenueTable[i] = getNumericCellValue(wb, revenueMap[i]);
+		for (int i = 0; i < 12; i++) {
+			if (i <= getMonthNumber(selectedMonth)) {
+				revenueTable[i] = getNumericCellValue(wb, revenueMap[i]);
+				System.out.println(revenueTable[i]);
+			} else {
+				revenueTable[i] = (double) 0;
+			}
 		}
 		
 	}
 	
 	private double getNumericCellValue(Workbook wb, String cellStr) {
 		Cell cell = getCell(wb, cellStr);
-		System.out.println(cell.getNumericCellValue());
 		return cell.getNumericCellValue();
 	}
 
@@ -458,6 +527,12 @@ public class HelloWorld {
 		CellReference c = new CellReference(cellStr);
 		Sheet sheet = wb.getSheet(c.getSheetName());
 		Cell cell = sheet.getRow(c.getRow()).getCell(c.getCol());
+//		if (cellStr.equals("'Garage & GEO Summary'!$F$14")) {
+//		if (cell.getCellType() == CellType.FORMULA) {
+//			System.out.println(cell.getCellFormula());
+//			evaluator.evaluateFormulaCell(cell);
+//		}
+//		}
 		return cell;
 	}
 
@@ -499,6 +574,55 @@ public class HelloWorld {
 
 	private void setPptxOutput(String pptxOutput) {
 		this.pptxOutput = pptxOutput;
+	}
+	
+	private void getGarageName(Workbook wb, String cellStr) {
+		garageName = getStringCellValue(wb, cellStr);
+	}
+	
+	private void getMakeMoneyTable(Workbook wb, String cellStr) {
+		System.out.println("Get Forecast and Backlog from worksheet");
+		CellReference cellRef = new CellReference(cellStr);
+		Sheet sheet = wb.getSheet(cellRef.getSheetName());
+		for (int i = 0;i < numDepts; i++) {
+			Row row = sheet.getRow(cellRef.getRow() + i);
+			String deptCode = row.getCell(cellRef.getCol()).getStringCellValue();
+			if (deptCodes.contains(deptCode.trim())) {
+				deptRevenue[i] = deptCode;
+				deptForecast[i] = row.getCell(cellRef.getCol() + forecastColOffser).getNumericCellValue();
+				deptBacklog[i] = row.getCell(cellRef.getCol() + backlogColOffset).getNumericCellValue();
+//				System.out.println(dataFormatter.formatCellValue(row.getCell(cellRef.getCol() + forecastColOffser)));
+//				System.out.println(dataFormatter.formatCellValue(row.getCell(cellRef.getCol() + backlogColOffset)));
+				System.out.println(deptCode);
+				System.out.println("forecast = " + deptForecast[i]);
+				System.out.println("backlog  = " + deptBacklog[i]);
+			}
+			
+		}
+		
+	}
+
+
+	public String getSelectedMonth() {
+		return selectedMonth;
+	}
+
+
+	public void setSelectedMonth(String selectedMonth) {
+		this.selectedMonth = selectedMonth;
+	}
+	
+	private int getMonthNumber(String monthName) {
+		int  i = 0;
+		try {
+			Date date = new SimpleDateFormat("MMMM").parse(monthName);
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			i = cal.get(Calendar.MONTH);
+		} catch (Exception e) {
+		}
+		
+		return i;
 	}
 	
 	
