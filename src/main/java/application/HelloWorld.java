@@ -75,9 +75,9 @@ import org.apache.poi.util.POILogger;
 
 public class HelloWorld {
 //	public static final String SAMPLE_XLSX_FILE_PATH = "/home/ike/microservicebuilder/poi/spreadsheet.xlsx";
-	private String xlsxPath = "/home/relucio/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
-	private String pptxTemplate = "/home/relucio/Downloads/MOR-Template_all.pptx";
-	private String pptxOutput = "/home/relucio/Downloads/output.pptx";
+	private String xlsxPath = "/home/ike/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
+	private String pptxTemplate = "/home/ike/Downloads/MOR-Template_all.pptx";
+	private String pptxOutput = "/home/ike/Downloads/output.pptx";
 	
 	private String selectedMonth;
 
@@ -91,15 +91,18 @@ public class HelloWorld {
 	
 	private String garageName;
 	private String garageNameReference = "'Garage & GEO Summary'!$F$5";
+	
 	// make money
-	private String revenueStart = "'Garage & GEO Summary'!$D$14";
 	private int forecastColOffser = 9;
 	private int backlogColOffset = 11;
 	private String[] dept = new String[numDepts];
 	private double[] deptForecast = new double[numDepts];
 	private double[] deptBacklog = new double[numDepts];
 	private double[] deptYTD = new double[numDepts];
+    private double[][] deptMonthly = new double[numDepts][12];
+
 	
+	// revenue trends chart
 	private double[] revenueTable = new double[12];
 	private double[] quarterlyTable = new double[12];
 	
@@ -111,50 +114,7 @@ public class HelloWorld {
 		put("7H", "7H");    
 		}};	
 		
-	private String[] revenueMap = new String[] {
-			"'Garage & GEO Summary'!$F$46",
-			"'Garage & GEO Summary'!$G$46",
-			"'Garage & GEO Summary'!$H$46",
-			"'Garage & GEO Summary'!$I$46",
-			"'Garage & GEO Summary'!$J$46",
-			"'Garage & GEO Summary'!$K$46",
-			"'Garage & GEO Summary'!$L$46",
-			"'Garage & GEO Summary'!$M$46",
-			"'Garage & GEO Summary'!$N$46",
-			"'Garage & GEO Summary'!$O$46",
-			"'Garage & GEO Summary'!$P$46",
-			"'Garage & GEO Summary'!$Q$46"
-	};
-	
-	private String[] targetRevenueMap = new String[] {
-			"'Sheet1'!$C$2",
-			"'Sheet1'!$C$3",
-			"'Sheet1'!$C$4",
-			"'Sheet1'!$C$5",
-			"'Sheet1'!$C$6",
-			"'Sheet1'!$C$7",
-			"'Sheet1'!$C$8",
-			"'Sheet1'!$C$9",
-			"'Sheet1'!$C$10",
-			"'Sheet1'!$C$11",
-			"'Sheet1'!$C$12",
-			"'Sheet1'!$C$13"
-	};
 
-	private String[] targetRevenueQtrMap = new String[] {
-			"'Sheet1'!$B$2",
-			"'Sheet1'!$B$3",
-			"'Sheet1'!$B$4",
-			"'Sheet1'!$B$5",
-			"'Sheet1'!$B$6",
-			"'Sheet1'!$B$7",
-			"'Sheet1'!$B$8",
-			"'Sheet1'!$B$9",
-			"'Sheet1'!$B$10",
-			"'Sheet1'!$B$11",
-			"'Sheet1'!$B$12",
-			"'Sheet1'!$B$13"
-	};
 	
 	
 	private Workbook xlsworkbook;
@@ -179,10 +139,11 @@ public class HelloWorld {
 			// Creating a Workbook from an Excel file (.xls or .xlsx)
 			Workbook workbook = WorkbookFactory.create(new File(getXlsxPath()));
 //			HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(new File(getXlsxPath())));
-			getGarageName(workbook, garageNameReference);
+			getGarageName(workbook);
 			System.out.println("Garage : " + garageName);
-			getMakeMoneyTable(workbook, revenueStart);
+			getMakeMoneyTable(workbook);
 		    getRevenueTable(workbook);
+		    getRevenueByDept(workbook);
 			
 			workbook.close();
 			
@@ -392,15 +353,18 @@ public class HelloWorld {
 			System.out.println(row + " " + numRows);
 		}
 		
-		
+		String fmtString = "#,##0.000";
 		
 		for (int row = 1; row < numRows; row++) {
-			
-			for (int col = 1; col < numCols; col++) {
-				shape.getCell(row, col).setText("M");
-			}
+			shape.getCell(row, 0).setText(dept[row - 1]);
+			shape.getCell(row, 2).setText(formatDouble(deptBacklog[row - 1]/1000000, fmtString));
+			shape.getCell(row, 3).setText(formatDouble(deptForecast[row - 1]/1000000, fmtString));
 		}
 		
+	}
+	
+	private String formatDouble(double d, String formatStr) {
+		return dataFormatter.formatRawCellContents(d, -1, formatStr);
 	}
 	
 	private void dumpWorkbookSheet(Sheet sheet) {
@@ -422,6 +386,21 @@ public class HelloWorld {
 	}
 	
 	private void updateRevenueTrendsXLS(Workbook wb, double[] revenue) {
+		String[] targetRevenueMap = new String[] {
+				"'Sheet1'!$C$2",
+				"'Sheet1'!$C$3",
+				"'Sheet1'!$C$4",
+				"'Sheet1'!$C$5",
+				"'Sheet1'!$C$6",
+				"'Sheet1'!$C$7",
+				"'Sheet1'!$C$8",
+				"'Sheet1'!$C$9",
+				"'Sheet1'!$C$10",
+				"'Sheet1'!$C$11",
+				"'Sheet1'!$C$12",
+				"'Sheet1'!$C$13"
+		};
+		
 		System.out.println("Update Revenue Trends table");
 		for (int i = 0; i < 12; i++) {
 			Cell cell = getCell(wb, targetRevenueMap[i]);
@@ -436,6 +415,21 @@ public class HelloWorld {
 
 	private void updateQuarterlyTrendsXLS(Workbook wb, double[] revenue) {
 		System.out.println("Update Quarterly Trends table");
+		
+		String[] targetRevenueQtrMap = new String[] {
+				"'Sheet1'!$B$2",
+				"'Sheet1'!$B$3",
+				"'Sheet1'!$B$4",
+				"'Sheet1'!$B$5",
+				"'Sheet1'!$B$6",
+				"'Sheet1'!$B$7",
+				"'Sheet1'!$B$8",
+				"'Sheet1'!$B$9",
+				"'Sheet1'!$B$10",
+				"'Sheet1'!$B$11",
+				"'Sheet1'!$B$12",
+				"'Sheet1'!$B$13"
+		};
 		
 		int m = getMonthNumber(selectedMonth);
 		int q = (int) (m/3);
@@ -502,8 +496,21 @@ public class HelloWorld {
 		
 	}
 	
-	
 	private void getRevenueTable(Workbook wb) {
+		String[] revenueMap = new String[] {
+				"'Garage & GEO Summary'!$F$46",
+				"'Garage & GEO Summary'!$G$46",
+				"'Garage & GEO Summary'!$H$46",
+				"'Garage & GEO Summary'!$I$46",
+				"'Garage & GEO Summary'!$J$46",
+				"'Garage & GEO Summary'!$K$46",
+				"'Garage & GEO Summary'!$L$46",
+				"'Garage & GEO Summary'!$M$46",
+				"'Garage & GEO Summary'!$N$46",
+				"'Garage & GEO Summary'!$O$46",
+				"'Garage & GEO Summary'!$P$46",
+				"'Garage & GEO Summary'!$Q$46"
+		};
 		
 		for (int i = 0; i < 12; i++) {
 			if (i <= getMonthNumber(selectedMonth)) {
@@ -511,6 +518,31 @@ public class HelloWorld {
 				System.out.println(revenueTable[i]);
 			} else {
 				revenueTable[i] = (double) 0;
+			}
+		}
+		
+	}
+
+	private void getRevenueByDept(Workbook wb) {
+		String[] map = new String[] {
+				"'Garage & GEO Summary'!$F$30",
+				"'Garage & GEO Summary'!$F$33",
+				"'Garage & GEO Summary'!$F$36",
+				"'Garage & GEO Summary'!$F$39",
+				"'Garage & GEO Summary'!$F$42"
+		};
+		
+		for (int i = 0; i < map.length; i++) {
+			CellReference cellRef = new CellReference(map[i]);
+			int pRow = cellRef.getRow();
+			int pCol = cellRef.getCol();
+			
+			for (int j = 0; j < deptMonthly[i].length; j++) {
+				deptMonthly[i][j] = 0.0;
+				for (int k = 0; k < 3; k++) {
+					CellReference cref = new CellReference("Garage & GEO Summary", pRow + k, pCol + j, true, true);
+					deptMonthly[i][j] = deptMonthly[i][j] + getNumericCellValue(wb, cref.formatAsString());
+				}
 			}
 		}
 		
@@ -541,12 +573,6 @@ public class HelloWorld {
 		CellReference c = new CellReference(cellStr);
 		Sheet sheet = wb.getSheet(c.getSheetName());
 		Cell cell = sheet.getRow(c.getRow()).getCell(c.getCol());
-//		if (cellStr.equals("'Garage & GEO Summary'!$F$14")) {
-//		if (cell.getCellType() == CellType.FORMULA) {
-//			System.out.println(cell.getCellFormula());
-//			evaluator.evaluateFormulaCell(cell);
-//		}
-//		}
 		return cell;
 	}
 
@@ -590,11 +616,14 @@ public class HelloWorld {
 		this.pptxOutput = pptxOutput;
 	}
 	
-	private void getGarageName(Workbook wb, String cellStr) {
+	private void getGarageName(Workbook wb) {
+		String cellStr = "'Garage & GEO Summary'!$F$5";
 		garageName = getStringCellValue(wb, cellStr);
 	}
 	
-	private void getMakeMoneyTable(Workbook wb, String cellStr) {
+	private void getMakeMoneyTable(Workbook wb) {
+		String cellStr = "'Garage & GEO Summary'!$D$14";
+
 		System.out.println("Get Forecast and Backlog from worksheet");
 		CellReference cellRef = new CellReference(cellStr);
 		Sheet sheet = wb.getSheet(cellRef.getSheetName());
