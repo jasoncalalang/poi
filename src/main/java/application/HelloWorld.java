@@ -74,10 +74,10 @@ import org.apache.poi.util.POILogger;
 
 
 public class HelloWorld {
-//	public static final String SAMPLE_XLSX_FILE_PATH = "/home/relucio/microservicebuilder/poi/spreadsheet.xlsx";
-	private String xlsxPath = "/home/relucio/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
-	private String pptxTemplate = "/home/relucio/Downloads/MOR-Template_all_copy.pptx";
-	private String pptxOutput = "/home/relucio/Downloads/output.pptx";
+//	public static final String SAMPLE_XLSX_FILE_PATH = "/home/ike/microservicebuilder/poi/spreadsheet.xlsx";
+	private String xlsxPath = "/home/ike/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
+	private String pptxTemplate = "/home/ike/Downloads/MOR-Template_all_copy.pptx";
+	private String pptxOutput = "/home/ike/Downloads/output.pptx";
 	
 	private String selectedMonth = "Jan";
 
@@ -121,6 +121,9 @@ public class HelloWorld {
 	
 	public static void main(String[] args) {
 		HelloWorld o = new HelloWorld();
+		System.out.println("Classpath : " + System.getProperty("java.class.path"));
+		URL fileurl = Thread.currentThread().getContextClassLoader().getResource("/MOR-Template_all_copy.pptx");
+		System.out.println(fileurl);
 		o.setSelectedMonth("May");
 		o.doit(args);
 	}

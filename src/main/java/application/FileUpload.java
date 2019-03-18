@@ -42,6 +42,7 @@ public class FileUpload extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
     	
+    	System.out.println("CLASSPATH : " + System.getProperty("java.class.path"));
     	URL fileUrl =  Thread.currentThread().getContextClassLoader().getResource("/MOR-Template_all_copy.pptx");
     	System.out.println(fileUrl);
 
