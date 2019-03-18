@@ -42,12 +42,10 @@ public class FileUpload extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
     	
-    	System.out.println("CLASSPATH : " + System.getProperty("java.class.path"));
     	URL fileUrl =  Thread.currentThread().getContextClassLoader().getResource("/MOR-Template_all_copy.pptx");
-    	System.out.println(fileUrl);
-
+    	
     	hw.setSelectedMonth(request.getParameter("month"));
-    	hw.setPptxTemplate(fileUrl.toString());
+    	hw.setPptxTemplate(fileUrl.getPath());
     	XMLSlideShow powerpoint = processFile(request.getPart("filename").getInputStream());
         response.setContentType("application/vnd.openxmlformats-officedocument.presentationml.presentation");
         response.setHeader("Content-Disposition", "filename=\"presentation.pptx\"");

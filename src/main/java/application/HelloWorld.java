@@ -121,9 +121,7 @@ public class HelloWorld {
 	
 	public static void main(String[] args) {
 		HelloWorld o = new HelloWorld();
-		System.out.println("Classpath : " + System.getProperty("java.class.path"));
 		URL fileurl = Thread.currentThread().getContextClassLoader().getResource("/MOR-Template_all_copy.pptx");
-		System.out.println(fileurl);
 		o.setSelectedMonth("May");
 		o.doit(args);
 	}
@@ -195,7 +193,7 @@ public class HelloWorld {
 
 				updateRevenueTrendsXLS(pptxworkbook, revenueTable);
 				updateQuarterlyTrendsXLS(pptxworkbook, revenueTable);
-
+				
 				for (XSLFShape sh : slide.getShapes()) {
 					String name = sh.getShapeName();
 
@@ -277,7 +275,6 @@ public class HelloWorld {
 			}
 		}
 		numRows = shape.getNumberOfRows();
-		System.out.println("numRows = " + numRows);
 		String fmtString = "#,##0.000";
 		
 		XSLFTextParagraph p = shape.getCell(0,1).getTextParagraphs().get(0);
@@ -295,12 +292,10 @@ public class HelloWorld {
 			shape.getCell(row, 2).setText(formatDouble(deptBacklog[row - 1]/1000000, fmtString));
 			shape.getCell(row, 3).setText(formatDouble(deptForecast[row - 1]/1000000, fmtString));
 		}
-		System.out.println("cell is " + shape.getCell(6, 0));
 		shape.getCell(numRows - 1, 0).setText("Total Garage");
 		shape.getCell(numRows - 1, 1).setText(formatDouble(ytd/1000000, fmtString));
 		shape.getCell(numRows - 1, 2).setText(formatDouble(backlog/1000000, fmtString));
 		shape.getCell(numRows - 1, 3).setText(formatDouble(forecast/1000000, fmtString));
-		//shape.addRow();
 		
 	}
 	
@@ -349,7 +344,6 @@ public class HelloWorld {
 				cell = createCell(wb, targetRevenueMap[i]);
 			}
 			setNumericCellValue(wb, targetRevenueMap[i], revenueTable[i]);
-			System.out.println(cell);
 		}
 
 	}
@@ -417,7 +411,6 @@ public class HelloWorld {
 		
 		for (int i = 0; i <= m; i++) {
 			int qs = (int) (i/3);
-			System.out.println("DOH");
 			quarterlyTable[qtr[qs]] = quarterlyTable[qtr[qs]] + revenueTable[i];
 		}
 		
@@ -431,7 +424,6 @@ public class HelloWorld {
 				continue;
 			}
 			setNumericCellValue(wb, targetRevenueQtrMap[i], quarterlyTable[i]);
-//			System.out.println(cell);
 			
 		}
 		
@@ -456,7 +448,6 @@ public class HelloWorld {
 		for (int i = 0; i < 12; i++) {
 			if (i <= getMonthNumber(selectedMonth)) {
 				revenueTable[i] = getNumericCellValue(wb, revenueMap[i]);
-				System.out.println(revenueTable[i]);
 			} else {
 				revenueTable[i] = (double) 0;
 			}
@@ -472,7 +463,6 @@ public class HelloWorld {
 				"'Garage & GEO Summary'!$F$39",
 				"'Garage & GEO Summary'!$F$42"
 		};
-		System.out.println("month number is "  + getMonthNumber(selectedMonth));
 		for (int i = 0; i < map.length; i++) {
 			CellReference cellRef = new CellReference(map[i]);
 			int pRow = cellRef.getRow();
@@ -571,11 +561,6 @@ public class HelloWorld {
 				dept[i] = deptCode;
 				deptForecast[i] = row.getCell(cellRef.getCol() + forecastColOffser).getNumericCellValue();
 				deptBacklog[i] = row.getCell(cellRef.getCol() + backlogColOffset).getNumericCellValue();
-//				System.out.println(dataFormatter.formatCellValue(row.getCell(cellRef.getCol() + forecastColOffser)));
-//				System.out.println(dataFormatter.formatCellValue(row.getCell(cellRef.getCol() + backlogColOffset)));
-				System.out.println(deptCode);
-				System.out.println("forecast = " + deptForecast[i]);
-				System.out.println("backlog  = " + deptBacklog[i]);
 			}
 			
 		}
