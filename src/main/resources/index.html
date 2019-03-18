@@ -147,230 +147,43 @@ main ul li a {
 
 <body>
 	<header id="flex-header">
-		<div class="cloud-header"></div>
+		
 		<h1>Congratulations!</h1>
-
-		<h2>You are currently running a WebSphere Liberty server built
-			for the IBM Cloud.</h2>
 	</header>
 	<ul>
+Instructions:
 
-		<li>
-			<div class="right-arrow"></div>
-			<div>
-				<a target="_blank" rel="noopener" href="http://wasdev.net/">WASdev.net</a>
-			</div>
-		</li>
-
-		<li>
-			<div class="right-arrow"></div>
-			<div>
-				<a target="_blank" rel="noopener"
-					href="https://www.ibm.com/cloud/cli">Install IBM Cloud
-					Developer Tools</a>
-			</div>
-		</li>
-
-		<li>
-			<div class="right-arrow"></div>
-			<div>
-				<a target="_blank" rel="noopener"
-					href="https://console.bluemix.net/developer/appservice/dashboard">Visit
-					IBM Cloud App Service</a>
-			</div>
-		</li>
-
-		<li>
-			<div class="right-arrow"></div>
-			<div>
-				<a target="_blank" rel="noopener"
-					href="https://slack-invite-ibm-cloud-tech.mybluemix.net/">Ask
-					questions on Slack</a>
-			</div>
-		</li>
-
+<p>1.  Load Revenue Forecast Spreadsheet (.xls) in Excel and ensure you have selected your garage location in the Garage &amp; GEO Summary sheet.   The data for the Make Money and Revenue Trends chart will be taken from this sheet.  Save your changes. </p>
+<p>2.  In the picklist below select the Month to be generated.  The YTD column in the Make Money table and the data in the Revenue Trends chart will only be up to the selected month.<p>3.  Select Browse and select the Revenue Forecast Spreadsheet from your filesystem.  The spreadsheet must be in .xls format.</p> 
+<p>4.  Click on Submit button to upload the file.  Wait a few seconds for your powerpoint slide to be generated.  Do not close the browser / browser tab or navigate away from this page.</p>
 	</ul>
-	<h2>
 		<form id="uploadbanner" enctype="multipart/form-data" method="post"
 			action="UploadServlet">
 			<p>&nbsp;</p>
 			<p>
-				Quarter <input name="Quarter" type="text" />
+			  Month  <select name="month">
+  				<option value="Jan">January</option>
+  				<option value="Feb">February</option>
+  				<option value="Mar">March</option>
+  				<option value="Apr">April</option>
+  				<option value="May">May</option>
+  				<option value="Jun">Jun</option>
+  				<option value="Jul">July</option>
+  				<option value="Aug">August</option>
+  				<option value="Sep">September</option>
+  				<option value="Oct">October</option>
+  				<option value="Nov">November</option>
+  				<option value="Dec">December</option>
+				</select> 
 			</p>
+			<p>&nbsp;</p>
 			<p>
-				Month <input name="Month" type="text" />
+				Filename <input id="fileupload" name="filename" type="file" />
 			</p>
-			<p>&nbsp;</p>
-			<p>Make Money</p>
-			<table style="height: 77px; margin-left: auto; margin-right: auto;"
-				border="1" width="606">
-				<tbody>
-					<tr>
-						<td style="width: 145.133px;">Division</td>
-						<td style="width: 145.117px;">Month YTD</td>
-						<td style="width: 145.133px;">Backlog</td>
-						<td style="width: 145.117px;">Forecast</td>
-					</tr>
-					<tr>
-						<td style="width: 145.133px;">Cloud Garage (8E)</td>
-						<td style="width: 145.117px;"><input name="8EYTD" step=".001"
-							type="number" /></td>
-						<td style="width: 145.133px;"><input name="8EBacklog"
-							step=".001" type="number" /></td>
-						<td style="width: 145.117px;"><input name="8EForecast"
-							step=".001" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 145.133px;">Hybrid (7G)</td>
-						<td style="width: 145.117px;"><input name="7GYTD" step=".001"
-							type="number" /></td>
-						<td style="width: 145.133px;"><input name="7GBacklog"
-							step=".001" type="number" /></td>
-						<td style="width: 145.117px;"><input name="7GForecast"
-							step=".001" type="number" /></td>
-					</tr>
-				</tbody>
-			</table>
-			<p>&nbsp;</p>
-			<p>Spend Money</p>
-			<table style="height: 149px; margin-left: auto; margin-right: auto;"
-				border="1" width="649">
-				<tbody>
-					<tr>
-						<td style="width: 47.25px;">Division</td>
-						<td style="width: 193px;">Month1</td>
-						<td style="width: 193px;">Month2</td>
-						<td style="width: 193px;">Month3</td>
-					</tr>
-					<tr>
-						<td style="width: 47.25px;">Cloud Garage (8E)</td>
-						<td style="width: 193px;"><input name="8EM1" step=".001"
-							type="number" /></td>
-						<td style="width: 193px;"><input name="8EM2" step=".001"
-							type="number" /></td>
-						<td style="width: 193px;"><input name="8EM3" step=".001"
-							type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 47.25px;">GP</td>
-						<td style="width: 193px;"><input name="8EGP1" type="number" /></td>
-						<td style="width: 193px;"><input name="8EGP2" type="number" /></td>
-						<td style="width: 193px;"><input name="8EGP3" type="number" /></td>
-					</tr>
-				</tbody>
-			</table>
-			<p>&nbsp;</p>
-			<p>Resource Utilization</p>
-			<table style="height: 136px; margin-left: auto; margin-right: auto;"
-				border="1" width="636">
-				<tbody>
-					<tr style="height: 25px;">
-						<td style="width: 152.633px; height: 25px;">Type</td>
-						<td style="width: 152.617px; height: 25px;">Month1</td>
-						<td style="width: 152.633px; height: 25px;">Month2</td>
-						<td style="width: 152.617px; height: 25px;">Month3</td>
-					</tr>
-					<tr style="height: 36px;">
-						<td style="width: 152.633px; height: 36px;">Billable
-							Utilization</td>
-						<td style="width: 152.617px; height: 36px;"><input
-							name="BillableM1" type="number" /></td>
-						<td style="width: 152.633px; height: 36px;"><input
-							name="BillableM2" type="number" /></td>
-						<td style="width: 152.617px; height: 36px;"><input
-							name="BillableM3" type="number" /></td>
-					</tr>
-					<tr style="height: 36px;">
-						<td style="width: 152.633px; height: 36px;">O.Client
-							Utilization</td>
-						<td style="width: 152.617px; height: 36px;"><input
-							name="ClientM1" type="number" /></td>
-						<td style="width: 152.633px; height: 36px;"><input
-							name="ClientM2" type="number" /></td>
-						<td style="width: 152.617px; height: 36px;"><input
-							name="ClientM3" type="number" /></td>
-					</tr>
-					<tr style="height: 36px;">
-						<td style="width: 152.633px; height: 36px;">Temp Hours</td>
-						<td style="width: 152.617px; height: 36px;"><input
-							name="TempM1" type="number" /></td>
-						<td style="width: 152.633px; height: 36px;"><input
-							name="TempM2" type="number" /></td>
-						<td style="width: 152.617px; height: 36px;"><input
-							name="TempM3" type="number" /></td>
-					</tr>
-					<tr style="height: 47.85px;">
-						<td style="width: 152.633px; height: 47.85px;">Missing Hours</td>
-						<td style="width: 152.617px; height: 47.85px;"><input
-							name="MissingM1" type="number" /></td>
-						<td style="width: 152.633px; height: 47.85px;"><input
-							name="MissingM2" type="number" /></td>
-						<td style="width: 152.617px; height: 47.85px;"><input
-							name="MissingM3" type="number" /></td>
-					</tr>
-				</tbody>
-			</table>
-			<p>&nbsp;</p>
-			<p>Revenue trends</p>
-			<table style="height: 242px; margin-left: auto; margin-right: auto;"
-				border="1" width="196">
-				<tbody>
-					<tr>
-						<td style="width: 90px;">Jan</td>
-						<td style="width: 90px;"><input name="RevM1" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Feb</td>
-						<td style="width: 90px;"><input name="RevM2" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Mar</td>
-						<td style="width: 90px;"><input name="RevM3" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Apr</td>
-						<td style="width: 90px;"><input name="RevM4" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">May</td>
-						<td style="width: 90px;"><input name="RevM5" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Jun</td>
-						<td style="width: 90px;"><input name="RevM6" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Jul</td>
-						<td style="width: 90px;"><input name="RevM7" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Aug</td>
-						<td style="width: 90px;"><input name="RevM8" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Sep</td>
-						<td style="width: 90px;"><input name="RevM9" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Oct</td>
-						<td style="width: 90px;"><input name="RevM10" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Nov</td>
-						<td style="width: 90px;"><input name="RevM11" type="number" /></td>
-					</tr>
-					<tr>
-						<td style="width: 90px;">Dec</td>
-						<td style="width: 90px;"><input name="RevM12" type="number" /></td>
-					</tr>
-				</tbody>
-			</table>
-			<p>&nbsp;</p>
-			<p>&nbsp;</p>
-			<input id="fileupload" name="filename" type="file" /> <input
-				type="submit" value="submit" id="submit" />
+			<p> 
+			   <input type="submit" value="submit" id="submit" />
+			</p>
 		</form>
-	</h2>
 </body>
 
 </html>

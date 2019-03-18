@@ -26,15 +26,15 @@ import java.awt.Color;
 import org.apache.poi.sl.usermodel.TextParagraph.TextAlign;
 import java.awt.Rectangle;
 
-@Path("upload")
+@Path("monthlyoperationsreport")
 public class UploadEndpoint {
     public static final String SAMPLE_XLSX_FILE_PATH = "/home/ike/microservicebuilder/poi/spreadsheet.xlsx";
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadxls(@Context HttpServletRequest request) {
-        System.out.println("we are here");
-        System.out.println(request);
+    	
+    	HelloWorld hw = new HelloWorld();
         try {
             /*
              * if (!healthy) { return
