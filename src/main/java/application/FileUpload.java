@@ -27,6 +27,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory;
 
 @WebServlet("/UploadServlet")
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
@@ -45,10 +47,14 @@ public class FileUpload extends HttpServlet {
     	URL fileUrl =  Thread.currentThread().getContextClassLoader().getResource("/MOR-Template_all_copy.pptx");
     	
     	hw.setSelectedMonth(request.getParameter("month"));
+    	hw.setSelectedYear(request.getParameter("year"));
     	hw.setPptxTemplate(fileUrl.getPath());
-    	XMLSlideShow powerpoint = processFile(request.getPart("filename").getInputStream());
+    	XMLSlideShow powerpoint = processFile(request.getPart("filename").getInputStream(), request.getPart("utilfilename").getInputStream());
         response.setContentType("application/vnd.openxmlformats-officedocument.presentationml.presentation");
         response.setHeader("Content-Disposition", "filename=\"presentation.pptx\"");
+//        response.setHeader("Cache-Control","no-cache, no-store, must-revalidate");
+//        response.setHeader("Pragma", "no-cache");
+//        response.setHeader("Expires", "0");
         powerpoint.write(response.getOutputStream());
         powerpoint.close();
         response.getOutputStream().close();
@@ -69,13 +75,15 @@ public class FileUpload extends HttpServlet {
         return "";
     }
 
-    private XMLSlideShow processFile(InputStream io) {
+    private XMLSlideShow processFile(InputStream io, InputStream utilIo) {
 
         XMLSlideShow powerpoint = null;
         try {
             Workbook workbook = WorkbookFactory.create(io);
-            powerpoint = hw.process(workbook);
+            Workbook utilwb = WorkbookFactory.create(utilIo);
+            powerpoint = hw.process(workbook,utilwb);
             workbook.close();
+            utilwb.close();
 
         } catch (Exception e) {
             e.printStackTrace();

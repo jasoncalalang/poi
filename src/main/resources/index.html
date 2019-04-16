@@ -147,43 +147,94 @@ main ul li a {
 
 <body>
 	<header id="flex-header">
-		
 		<h1>Congratulations!</h1>
 	</header>
 	<ul>
-Instructions:
-
-<p>1.  Load Revenue Forecast Spreadsheet (.xls) in Excel and ensure you have selected your garage location in the Garage &amp; GEO Summary sheet.   The data for the Make Money and Revenue Trends chart will be taken from this sheet.  Save your changes. </p>
-<p>2.  In the picklist below select the Month to be generated.  The YTD column in the Make Money table and the data in the Revenue Trends chart will only be up to the selected month.<p>3.  Select Browse and select the Revenue Forecast Spreadsheet from your filesystem.  The spreadsheet must be in .xls format.</p> 
-<p>4.  Click on Submit button to upload the file.  Wait a few seconds for your powerpoint slide to be generated.  Do not close the browser / browser tab or navigate away from this page.</p>
+		<ul>Instructions:
+		</ul>
 	</ul>
-		<form id="uploadbanner" enctype="multipart/form-data" method="post"
-			action="UploadServlet">
-			<p>&nbsp;</p>
-			<p>
-			  Month  <select name="month">
-  				<option value="Jan">January</option>
-  				<option value="Feb">February</option>
-  				<option value="Mar">March</option>
-  				<option value="Apr">April</option>
-  				<option value="May">May</option>
-  				<option value="Jun">Jun</option>
-  				<option value="Jul">July</option>
-  				<option value="Aug">August</option>
-  				<option value="Sep">September</option>
-  				<option value="Oct">October</option>
-  				<option value="Nov">November</option>
-  				<option value="Dec">December</option>
-				</select> 
-			</p>
-			<p>&nbsp;</p>
-			<p>
-				Filename <input id="fileupload" name="filename" type="file" />
-			</p>
-			<p> 
-			   <input type="submit" value="submit" id="submit" />
-			</p>
-		</form>
+	<p>
+		1. Load Revenue Forecast Spreadsheet (.xls) in Excel and ensure you
+		have selected your garage location in the Garage &amp; GEO Summary
+		sheet. The data for the Make Money and Revenue Trends chart will be
+		taken from this sheet. Save your changes.&nbsp; <span
+			style="color: #ff0000;">The sheet name MUST BE "Garage &amp;
+			GEO Summary".&nbsp; Please rename the sheet if this is not the case.</span>
+	</p>
+	<p>
+		2. Load Utilization Spreadsheet (.xlsx) in Excel. In the "Adhoc
+		Export" sheet ensure that you have filtered column E1 (Area) to show
+		only your garage location. Save your changes.&nbsp; <span
+			style="color: #ff0000;">The sheet name MUST BE "Adhoc
+			Export".&nbsp; Please rename the sheet if this is not the case.</span>
+	</p>
+	<p>3. In the picklist below select the Month and Year to be
+		generated. The YTD column in the Make Money table and the data in the
+		Revenue Trends chart will only be up to the selected month.</p>
+	<p>4. Select Browse/Choose File and select the Revenue Forecast
+		Spreadsheet from your filesystem. The spreadsheet must be in .xls
+		format.</p>
+	<p>5. Select Browse/Choose File and select the Utilization
+		Spreadsheet from you filesystem.&nbsp; The spreadsheet must be in
+		.xlsx format.</p>
+	<p>6. The Spend file is currently not processed.</p>
+	<p>7. Click on Submit button to upload the file. Wait a few seconds
+		for your powerpoint slide to be generated. Do not close the browser /
+		browser tab or navigate away from this page.</p>
+	<form id="uploadbanner" action="UploadServlet"
+		enctype="multipart/form-data" method="post">
+		<p>&nbsp;</p>
+		<table
+			style="height: 67px; width: 625px; margin-left: auto; margin-right: auto;"
+			border="1">
+			<tbody>
+				<tr>
+					<td style="width: 125px;">Month/Year</td>
+					<td style="width: 500px;"><select name="month">
+							<option value="Jan">January</option>
+							<option value="Feb">February</option>
+							<option value="Mar">March</option>
+							<option value="Apr">April</option>
+							<option value="May">May</option>
+							<option value="Jun">Jun</option>
+							<option value="Jul">July</option>
+							<option value="Aug">August</option>
+							<option value="Sep">September</option>
+							<option value="Oct">October</option>
+							<option value="Nov">November</option>
+							<option value="Dec">December</option>
+					</select><select name="year">
+							<option value="2019">2019</option>
+					</select></td>
+				</tr>
+				<tr>
+					<td style="width: 125px;">Revenue Forecast</td>
+					<td style="width: 500px;"><input id="fileupload"
+						name="filename" type="file" /></td>
+				</tr>
+				<tr>
+					<td style="width: 125px;">Spend</td>
+					<td style="width: 500px;"><input id="spendfileupload"
+						name="spendfilename" type="file" /></td>
+				</tr>
+				<tr>
+					<td style="width: 125px;">Utilization</td>
+					<td style="width: 500px;"><input id="utilfileupload"
+						name="utilfilename" type="file" /></td>
+				</tr>
+			</tbody>
+		</table>
+		<table
+			style="height: 24px; width: 625px; margin-left: auto; margin-right: auto;"
+			border="1">
+			<tbody>
+				<tr>
+					<td style="text-align: center; vertical-align: middle;"><input
+						id="submit" type="submit" value="submit" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
 </body>
 
 </html>
