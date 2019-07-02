@@ -5,6 +5,6 @@ applications:
   name: poi
   buildpack: liberty-for-java
   path: ./target/poi-1.0-SNAPSHOT.zip
-  memory: 1024M
+  memory: 4096M
   domain: au-syd.mybluemix.net 
   host: poi-holloi

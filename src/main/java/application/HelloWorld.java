@@ -36,11 +36,9 @@ import org.apache.poi.openxml4j.util.ZipSecureFile;
 
 public class HelloWorld {
 //	public static final String SAMPLE_XLSX_FILE_PATH = "/home/relucio/microservicebuilder/poi/spreadsheet.xlsx";
-	// private String xlsxPath = "/home/relucio/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
-	// private String xlsxPath = "/home/relucio/Downloads/19Q1 Revenue Forecast (Week 8) Draft (When Editing - LOCK-OPEN-SAVE).xls";
-	private String xlsxPath = "/home/relucio/Downloads/19Q2 Revenue Forecast (Week 3) Draft (When Editing - LOCK - OPEN - SAVE).xls";
+	private String xlsxPath = "/home/relucio/Downloads/19Q2 Revenue Forecast.xls";
 	
-	private String utilizationXlsxPath = "/home/relucio/Downloads/191Q Utilization Report weekending 040519.xlsx";
+	private String utilizationXlsxPath = "/home/relucio/Downloads/192Q Utilization Report weekending 062119.xlsx";
 	private String pptxTemplate = "/home/relucio/Downloads/MOR-Template_all_copy.pptx";
 	private String pptxOutput = "/home/relucio/Downloads/output.pptx";
 	
@@ -53,6 +51,7 @@ public class HelloWorld {
 	
 	private int pptxChartOffset = 9999;
 	
+	private String revenueSheetName;
 	private String garageName;
 	
 	// make money
@@ -94,6 +93,11 @@ public class HelloWorld {
 
 	
 	public static void main(String[] args) {
+		if (args.length != 0) {
+			System.out.println(args[0]);
+			System.out.println(args[1]);
+			System.out.println(args[2]);
+		}
 		HelloWorld o = new HelloWorld();
 		o.setSelectedMonth("May");
 		o.setSelectedYear("2019");
@@ -131,7 +135,8 @@ public class HelloWorld {
 
 		XMLSlideShow powerpoint = null;
 		try {
-
+			
+			getSheetName(workbook);
 			getGarageName(workbook);
 
 			System.out.println("Garage : " + garageName);
@@ -213,6 +218,17 @@ public class HelloWorld {
 		return powerpoint;
 	}
 	
+	private void getSheetName(Workbook workbook) {
+		int numSheets = workbook.getNumberOfSheets();
+		for (int i = 0; i < numSheets; i++) {
+			if (workbook.getSheetName(i).contains("Garage & GEO Summary")) {
+				revenueSheetName = workbook.getSheetName(i);
+			}
+			
+		}
+	}
+
+
 	private void pathUtilizationTitle(XSLFTextBox sh) {
 		// TODO Auto-generated method stub
 		System.out.println(sh.getText());
@@ -231,10 +247,22 @@ public class HelloWorld {
 		System.out.println("First row = " + sheet.getFirstRowNum());
 		System.out.println("Top row = " + sheet.getTopRow());
 		
-		short totalCol = (new CellReference("AD1")).getCol();
-		short billableCol = (new CellReference("AF1")).getCol();
-		short customerFacingCol = (new CellReference("AH1").getCol());
-		short monthCol = (new CellReference("U1").getCol());
+//		short totalCol = (new CellReference("AD1")).getCol();
+//		short billableCol = (new CellReference("AF1")).getCol();
+//		short customerFacingCol = (new CellReference("AH1").getCol());
+//		short monthCol = (new CellReference("U1").getCol());
+
+//		short totalCol = (new CellReference("AN1")).getCol();
+//		short billableCol = (new CellReference("AG1")).getCol();
+//		short customerFacingCol = (new CellReference("AI1").getCol());
+//		short monthCol = (new CellReference("V1").getCol());
+
+		short totalCol = (new CellReference("AO1")).getCol();
+		short billableCol = (new CellReference("AH1")).getCol();
+		short customerFacingCol = (new CellReference("AJ1").getCol());
+		short monthCol = (new CellReference("V1").getCol());
+
+		
 		
 		double t;
 		double b;
@@ -257,11 +285,20 @@ public class HelloWorld {
 		String m = "";
 		
 		Iterator<Row> i = sheet.iterator();
+		Row row = null;
+		Cell cell = null;
+		try {
 		while (i.hasNext()) {
-			Row row = (Row) i.next();
+			row = (Row) i.next();
 			if (row.getRowNum() == 0) continue;
-			Cell cell = row.getCell(4);
-			if ((cell != null) && (!row.getZeroHeight())) {
+			if (!row.getZeroHeight()) continue;
+			cell = row.getCell(4);
+//			System.out.println(row.getRowNum());
+//			System.out.println(cell.getColumnIndex());
+//			if ((cell != null) && (!row.getZeroHeight())) {
+			if (cell != null) {
+//				System.out.println(row.getRowNum() + ":" + cell.getColumnIndex());
+//				System.out.println("XXX : " + row.getCell(totalCol).getStringCellValue());
 				t = row.getCell(totalCol).getNumericCellValue();
 				b = row.getCell(billableCol).getNumericCellValue();
 				c = row.getCell(customerFacingCol).getNumericCellValue();
@@ -289,6 +326,13 @@ public class HelloWorld {
 				billableHours = billableHours + b;
 				customerFacingHours = customerFacingHours + c;
 			}
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(row.getRowNum());
+			System.out.println(cell.getColumnIndex());
+			System.out.println(row.getCell(12).getStringCellValue());
+			throw e;
 		}
 		
 		System.out.println(sheet.getActiveCell().formatAsString());
@@ -566,18 +610,18 @@ public class HelloWorld {
 	
 	private void getRevenueTable(Workbook wb) {
 		String[] revenueMap = new String[] {
-				"'Garage & GEO Summary'!$F$46",
-				"'Garage & GEO Summary'!$G$46",
-				"'Garage & GEO Summary'!$H$46",
-				"'Garage & GEO Summary'!$I$46",
-				"'Garage & GEO Summary'!$J$46",
-				"'Garage & GEO Summary'!$K$46",
-				"'Garage & GEO Summary'!$L$46",
-				"'Garage & GEO Summary'!$M$46",
-				"'Garage & GEO Summary'!$N$46",
-				"'Garage & GEO Summary'!$O$46",
-				"'Garage & GEO Summary'!$P$46",
-				"'Garage & GEO Summary'!$Q$46"
+				"'" + revenueSheetName + "'" + "!$F$46",
+				"'" + revenueSheetName + "'" + "!$G$46",
+				"'" + revenueSheetName + "'" + "!$H$46",
+				"'" + revenueSheetName + "'" + "!$I$46",
+				"'" + revenueSheetName + "'" + "!$J$46",
+				"'" + revenueSheetName + "'" + "!$K$46",
+				"'" + revenueSheetName + "'" + "!$L$46",
+				"'" + revenueSheetName + "'" + "!$M$46",
+				"'" + revenueSheetName + "'" + "!$N$46",
+				"'" + revenueSheetName + "'" + "!$O$46",
+				"'" + revenueSheetName + "'" + "!$P$46",
+				"'" + revenueSheetName + "'" + "!$Q$46"
 		};
 		
 		for (int i = 0; i < 12; i++) {
@@ -592,11 +636,11 @@ public class HelloWorld {
 
 	private void getRevenueByDept(Workbook wb) {
 		String[] map = new String[] {
-				"'Garage & GEO Summary'!$F$30",
-				"'Garage & GEO Summary'!$F$33",
-				"'Garage & GEO Summary'!$F$36",
-				"'Garage & GEO Summary'!$F$39",
-				"'Garage & GEO Summary'!$F$42"
+				"'" + revenueSheetName + "'" + "!$F$30",
+				"'" + revenueSheetName + "'" + "!$F$33",
+				"'" + revenueSheetName + "'" + "!$F$36",
+				"'" + revenueSheetName + "'" + "!$F$39",
+				"'" + revenueSheetName + "'" + "!$F$42"
 		};
 		for (int i = 0; i < map.length; i++) {
 			CellReference cellRef = new CellReference(map[i]);
@@ -607,7 +651,7 @@ public class HelloWorld {
 				deptMonthly[i][j] = 0.0;
 				double val = 0.0;
 				for (int k = 0; k < 3; k++) {
-					CellReference cref = new CellReference("Garage & GEO Summary", pRow + k, pCol + j, true, true);
+					CellReference cref = new CellReference(revenueSheetName, pRow + k, pCol + j, true, true);
 					val = getNumericCellValue(wb, cref.formatAsString());
 					deptMonthly[i][j] = deptMonthly[i][j] + val;
 					
@@ -679,12 +723,12 @@ public class HelloWorld {
 	}
 
 	private void getGarageName(Workbook wb) {
-		String cellStr = "'Garage & GEO Summary'!$F$5";
+		String cellStr = "'" + revenueSheetName + "'" + "!$F$5";
 		garageName = getStringCellValue(wb, cellStr);
 	}
 	
 	private void getMakeMoneyTable(Workbook wb) {
-		String cellStr = "'Garage & GEO Summary'!$D$14";
+		String cellStr = "'" + revenueSheetName + "'" + "!$D$14";
 
 		System.out.println("Get Forecast and Backlog from worksheet");
 		CellReference cellRef = new CellReference(cellStr);
